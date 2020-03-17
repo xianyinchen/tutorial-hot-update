@@ -153,7 +153,7 @@ function newVersion(argv) {
 
     const copyDir = function (src, dst) {
         var paths = fs.readdirSync(src);
-        if (!fs.existsSync(dst))fs.mkdirSync(dst);        
+        if (!fs.existsSync(dst)) fs.mkdirSync(dst);
         paths.forEach(function (path) {
             const _src = src + '/' + path
             const _dst = dst + '/' + path
@@ -172,6 +172,18 @@ function newVersion(argv) {
         })
     }
 
+    // 创建首包
+    try {
+        if (!fs.existsSync(path.join(orgin, 'src'))) {
+            copyDir(path.join(src, 'src'), path.join(orgin, 'src'));
+            copyDir(path.join(src, 'res'), path.join(orgin, 'res'));            
+            return;
+        }
+    } catch (e) {
+
+    }
+
+    // 还原首包资源
     try {
         deleteFolderRecursive(path.join(src, 'src'));
         copyDir(path.join(orgin, 'src'), path.join(src, 'src'));
