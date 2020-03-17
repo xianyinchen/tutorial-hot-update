@@ -152,7 +152,9 @@ function newVersion(argv) {
     };
 
     const copyDir = function (src, dst) {
+        if (!fs.existsSync(src)) return;
         var paths = fs.readdirSync(src);
+
         if (!fs.existsSync(dst)) fs.mkdirSync(dst);
         paths.forEach(function (path) {
             const _src = src + '/' + path
@@ -172,27 +174,19 @@ function newVersion(argv) {
         })
     }
 
-    // 创建首包
-    try {
-        if (!fs.existsSync(path.join(orgin, 'src'))) {
-            copyDir(path.join(src, 'src'), path.join(orgin, 'src'));
-            copyDir(path.join(src, 'res'), path.join(orgin, 'res'));            
-            return;
-        }
-    } catch (e) {
-
+    if (!fs.existsSync(path.join(orgin, 'src'))) {
+        mkdirSync(orgin);
+        copyDir(path.join(src, 'src'), path.join(orgin, 'src'));
+        copyDir(path.join(src, 'res'), path.join(orgin, 'res'));
     }
-
-    // 还原首包资源
-    try {
+    else {
         deleteFolderRecursive(path.join(src, 'src'));
         copyDir(path.join(orgin, 'src'), path.join(src, 'src'));
 
         deleteFolderRecursive(path.join(src, 'res'));
         copyDir(path.join(orgin, 'res'), path.join(src, 'res'));
-    } catch (e) {
-
     }
+
 }
 
 module.exports = newVersion;
