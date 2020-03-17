@@ -63,3 +63,8 @@ quick_gen_project_*_autogen.sh.meta
 # JSB publish files
 
 jsb/
+
+# hot-update
+
+orgin-assets/
+remote-assets/

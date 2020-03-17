@@ -37,5 +37,25 @@
     "subContext": ""
   },
   "xxteaKey": "e8579297-5167-40",
-  "zipCompressJs": true
+  "zipCompressJs": true,
+  "android": {
+    "packageName": "org.cocos2d.tutorialhotupdate"
+  },
+  "ios": {
+    "packageName": "org.cocos2d.tutorialhotupdate"
+  },
+  "mac": {
+    "packageName": "org.cocos2d.tutorialhotupdate"
+  },
+  "win32": {},
+  "android-instant": {
+    "REMOTE_SERVER_ROOT": "",
+    "host": "",
+    "packageName": "org.cocos2d.tutorialhotupdate",
+    "pathPattern": "",
+    "recordPath": "",
+    "scheme": "https",
+    "skipRecord": false
+  },
+  "appBundle": false
 }

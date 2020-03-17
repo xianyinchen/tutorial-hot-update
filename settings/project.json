@@ -6,7 +6,14 @@
   ],
   "design-resolution-height": 640,
   "design-resolution-width": 960,
-  "excluded-modules": [],
+  "excluded-modules": [
+    "Geom Utils",
+    "3D",
+    "3D Primitive",
+    "3D Physics/cannon.js",
+    "3D Physics/Builtin",
+    "3D Particle"
+  ],
   "fit-height": true,
   "fit-width": false,
   "group-list": [
@@ -24,5 +31,17 @@
     "enable": false,
     "appID": "",
     "appSecret": ""
+  },
+  "last-module-event-record-time": 1584427775952,
+  "assets-sort-type": "name",
+  "facebook": {
+    "enable": false,
+    "appID": "",
+    "live": {
+      "enable": false
+    },
+    "audience": {
+      "enable": false
+    }
   }
 }
