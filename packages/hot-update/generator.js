@@ -2,7 +2,52 @@ var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto');
 
-function newVersion(argv) {
+function rmdirSync(path) {
+    if (fs.existsSync(path)) {
+        fs.readdirSync(path).forEach(function (file) {
+            var curPath = path + "/" + file;
+            if (fs.statSync(curPath).isDirectory()) { // recurse
+                rmdirSync(curPath);
+            } else { // delete file
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(path);
+    }
+};
+
+const copyDir = function (src, dst) {
+    if (!fs.existsSync(src)) return;
+    var paths = fs.readdirSync(src);
+
+    if (!fs.existsSync(dst)) fs.mkdirSync(dst);
+    paths.forEach(function (path) {
+        const _src = src + '/' + path
+        const _dst = dst + '/' + path
+        let readable; let writable
+        var st = fs.statSync(_src);
+        if (st.isFile()) {
+            readable = fs.createReadStream(_src)
+            writable = fs.createWriteStream(_dst)
+            readable.pipe(writable)
+        }
+        else if (st.isDirectory()) {
+            if (!fs.existsSync(dst))
+                fs.mkdirSync(dst);
+            copyDir(_src, _dst);
+        }
+    })
+}
+
+var mkdirSync = function (path) {
+    try {
+        fs.mkdirSync(path);
+    } catch (e) {
+        if (e.code != 'EEXIST') throw e;
+    }
+}
+
+function Version(argv) {
     var manifest = {
         packageUrl: 'http://localhost/tutorial-hot-update/remote-assets/',
         remoteManifestUrl: 'http://localhost/tutorial-hot-update/remote-assets/project.manifest',
@@ -12,6 +57,7 @@ function newVersion(argv) {
         searchPaths: []
     };
 
+    var first_version = '1.0.0';
     var orgin = './orgin-assets/';
     var dest = './remote-assets/';
     var src = './jsb/';
@@ -46,6 +92,10 @@ function newVersion(argv) {
                 break;
             case '-o':
                 orgin = argv[i + 1];
+                i += 2;
+                break;
+            case '-f':
+                first_version = argv[i + 1];
                 i += 2;
                 break;
             default:
@@ -108,14 +158,6 @@ function newVersion(argv) {
         }
     }
 
-    var mkdirSync = function (path) {
-        try {
-            fs.mkdirSync(path);
-        } catch (e) {
-            if (e.code != 'EEXIST') throw e;
-        }
-    }
-
     // Iterate res and src folder
     readDir(path.join(src, 'src'), manifest.assets);
     readDir(path.join(src, 'res'), manifest.assets);
@@ -125,68 +167,34 @@ function newVersion(argv) {
 
     mkdirSync(dest);
 
-    fs.writeFile(destManifest, JSON.stringify(manifest), (err) => {
-        if (err) throw err;
-        Editor.log('Manifest successfully generated');
-    });
+    fs.writeFileSync(destManifest, JSON.stringify(manifest))
 
     delete manifest.assets;
     delete manifest.searchPaths;
-    fs.writeFile(destVersion, JSON.stringify(manifest), (err) => {
-        if (err) throw err;
-        Editor.log('Version successfully generated');
-    });
+    fs.writeFileSync(destVersion, JSON.stringify(manifest));
 
-    function deleteFolderRecursive(path) {
-        if (fs.existsSync(path)) {
-            fs.readdirSync(path).forEach(function (file) {
-                var curPath = path + "/" + file;
-                if (fs.statSync(curPath).isDirectory()) { // recurse
-                    deleteFolderRecursive(curPath);
-                } else { // delete file
-                    fs.unlinkSync(curPath);
-                }
-            });
-            fs.rmdirSync(path);
+    // 生成首包
+    if (first_version.length > 0) {
+        if (first_version == manifest.version) {
+            // 生成首包
+            rmdirSync(orgin);
+            mkdirSync(orgin);
+            copyDir(path.join(dest, 'src'), path.join(orgin, 'src'));
+            copyDir(path.join(dest, 'res'), path.join(orgin, 'res'));        
         }
-    };
-
-    const copyDir = function (src, dst) {
-        if (!fs.existsSync(src)) return;
-        var paths = fs.readdirSync(src);
-
-        if (!fs.existsSync(dst)) fs.mkdirSync(dst);
-        paths.forEach(function (path) {
-            const _src = src + '/' + path
-            const _dst = dst + '/' + path
-            let readable; let writable
-            var st = fs.statSync(_src);
-            if (st.isFile()) {
-                readable = fs.createReadStream(_src)
-                writable = fs.createWriteStream(_dst)
-                readable.pipe(writable)
-            }
-            else if (st.isDirectory()) {
-                if (!fs.existsSync(dst))
-                    fs.mkdirSync(dst);
-                copyDir(_src, _dst);
-            }
-        })
+        else {
+            // 生成首包之前同步 project.manifest            
+            fs.copyFileSync(destManifest, path.join(__dirname, "../../assets/project.manifest"));
+        }
     }
-
-    if (!fs.existsSync(path.join(orgin, 'src'))) {
-        mkdirSync(orgin);
-        copyDir(path.join(src, 'src'), path.join(orgin, 'src'));
-        copyDir(path.join(src, 'res'), path.join(orgin, 'res'));
+    else if (fs.existsSync(path.join(orgin, 'src'))) {
+        rmdirSync(path.join(dest, 'src'));
+        rmdirSync(path.join(dest, 'res'));
+        copyDir(path.join(orgin, 'src'), path.join(dest, 'src'));
+        copyDir(path.join(orgin, 'res'), path.join(dest, 'res'));
     }
-    else {
-        deleteFolderRecursive(path.join(src, 'src'));
-        copyDir(path.join(orgin, 'src'), path.join(src, 'src'));
-
-        deleteFolderRecursive(path.join(src, 'res'));
-        copyDir(path.join(orgin, 'res'), path.join(src, 'res'));
-    }
-
 }
 
-module.exports = newVersion;
+module.exports = {
+    Version
+}

@@ -2,11 +2,19 @@
 
 var Fs = require("fire-fs");
 var Path = require("fire-path");
-var NewV = require("./generator")
+var GenV = require("./generator")
+
+var first_version = "1.0.0";
+var setup_version = "1.0.0";
+var remote_address = "192.168.55.48:5501";
+var orgin_assets = Path.join(__dirname, "../../orgin-assets/");
+var remote_assets = Path.join(__dirname, "../../remote-assets/");
 
 module.exports = {
     load: function () {
         // 当 package 被正确加载的时候执行
+        var numVersion = first_version.split(".");
+        first_version = (numVersion[0] || "1") + "." + (numVersion[1] || "0") + "." + (parseInt(numVersion[2] || "0") + 1);        
     },
 
     unload: function () {
@@ -14,7 +22,7 @@ module.exports = {
     },
 
     messages: {
-        'editor:build-finished': function (event, target) {
+        "editor:build-finished": function (event, target) {
             var root = Path.normalize(target.dest);
             var url = Path.join(root, "main.js");
             Fs.readFile(url, "utf8", function (err, data) {
@@ -26,10 +34,10 @@ module.exports = {
                     "(function () {\n" +
                     "    if (typeof window.jsb === 'object') {\n" +
                     "        var hotUpdateSearchPaths = localStorage.getItem('HotUpdateSearchPaths');\n" +
-                    "        if (hotUpdateSearchPaths) {\n" +                                  
-                    "            jsb.fileUtils.setSearchPaths([jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/']);\n" +                         
-                    "            jsb.AssetsManager.checkFinish('blackjack-remote-asset')\n" +
-                    "            jsb.fileUtils.setSearchPaths(JSON.parse(hotUpdateSearchPaths));\n" +                         
+                    "        if (hotUpdateSearchPaths) {\n" +
+                    "            var _storagePath = (jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + hotUpdateSearchPaths;\n" +
+                    "            jsb.AssetsManager.checkFinish(_storagePath);\n" +
+                    "            jsb.fileUtils.setSearchPaths(_storagePath);\n" +
                     "        }\n" +
                     "    }\n" +
                     "})();\n";
@@ -42,21 +50,45 @@ module.exports = {
                 });
             });
 
-            // 写入配置
-            var profile = Editor.Profile.load('profile://project/hotupdate.json');
-            var newVer = parseInt(profile.data['version'] || "0") + 1;
-            profile.data['version'] = newVer;
+            // 读取更新配置
+            var profile = Editor.Profile.load("profile://project/hotupdate.json");
+            var first_done = profile.data["first_done"];
+
+            // 生成版本
+            var newVersion = setup_version;
+            var oldVersion = profile.data["version"];
+            if (oldVersion) {
+                var numVersion = oldVersion.split(".");
+                newVersion = (numVersion[0] || "1") + "." + (numVersion[1] || "0") + "." + (parseInt(numVersion[2] || "0") + 1);
+            }
+
+            try {
+                // 生成更新包
+                GenV.Version([
+                    "-f", first_done ? "" : first_version,
+                    "-v", newVersion,
+                    "-u", "http://" + remote_address + "/remote-assets/",
+                    "-s", root,
+                    "-d", remote_assets,
+                    "-o", orgin_assets,
+                ]);
+            } catch (e) {
+                Editor.log(e);
+            }
+
+            // 标记首包生成完毕
+            if (first_version == newVersion) {
+                profile.data["setup"] = true;
+            }
+
+            // 保存版本号
+            profile.data["first_done"] = newVersion;
             profile.save();
 
-            NewV([
-                "-v", '1.0.' + newVer,
-                "-u", "http://192.168.55.54:5501/remote-assets/",
-                "-s", Path.join(__dirname, "../../build/jsb-link/"),
-                "-d", Path.join(__dirname, "../../remote-assets/"),
-                "-o", Path.join(__dirname, "../../orgin-assets/"),
-            ]);
+            // 更新版本文件
+            Editor.assetdb.refresh("db://assets//project.manifest");
+            Editor.log("New Version " + newVersion);
 
-            Editor.log("New " + '1.0.' + newVer);
         }
     }
 };
