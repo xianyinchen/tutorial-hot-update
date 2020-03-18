@@ -180,7 +180,8 @@ function Version(argv) {
             rmdirSync(orgin);
             mkdirSync(orgin);
             copyDir(path.join(dest, 'src'), path.join(orgin, 'src'));
-            copyDir(path.join(dest, 'res'), path.join(orgin, 'res'));        
+            copyDir(path.join(dest, 'res'), path.join(orgin, 'res'));       
+            Editor && Editor.warn("new first package (" + first_version + ") success.")
         }
         else {
             // 生成首包之前同步 project.manifest            
