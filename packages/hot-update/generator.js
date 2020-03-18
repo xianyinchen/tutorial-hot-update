@@ -176,12 +176,15 @@ function Version(argv) {
     // 生成首包
     if (first_version.length > 0) {
         if (first_version == manifest.version) {
-            // 生成首包
+            // 清除版本数据
             rmdirSync(orgin);
+            rmdirSync(dest);
+
+            // 生成首包
             mkdirSync(orgin);
             copyDir(path.join(dest, 'src'), path.join(orgin, 'src'));
             copyDir(path.join(dest, 'res'), path.join(orgin, 'res'));       
-            Editor && Editor.warn("new first package (" + first_version + ") success.")
+            Editor && Editor.Dialog.messageBox(null, {type: "info", message: "new first package done!"});
         }
         else {
             // 生成首包之前同步 project.manifest            
@@ -193,6 +196,7 @@ function Version(argv) {
         rmdirSync(path.join(dest, 'res'));
         copyDir(path.join(orgin, 'src'), path.join(dest, 'src'));
         copyDir(path.join(orgin, 'res'), path.join(dest, 'res'));
+        Editor && Editor.warn("replace build res/src with first package resource.")
     }
 }
 

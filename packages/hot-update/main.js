@@ -32,7 +32,7 @@ module.exports = {
                     "    if (typeof window.jsb === 'object') {\n" +
                     "        var hotUpdateSearchPaths = localStorage.getItem('HotUpdateSearchPaths');\n" +
                     "        if (hotUpdateSearchPaths) {\n" +
-                    "            var _storagePath = (jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + hotUpdateSearchPaths;\n" +
+                    "            var _storagePath = [(jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + hotUpdateSearchPaths];\n" +
                     "            jsb.AssetsManager.checkFinish(_storagePath);\n" +
                     "            jsb.fileUtils.setSearchPaths(_storagePath);\n" +
                     "        }\n" +
