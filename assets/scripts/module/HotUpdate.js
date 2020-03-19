@@ -252,7 +252,7 @@ cc.Class({
                 this.panel.info.string = "Already up to date with the latest remote version.";
                 break;
             case jsb.EventAssetsManager.NEW_VERSION_FOUND:
-                this.panel.info.string = 'New version found, please try to update. (' + Math.ceil(this._am.getTotalBytes()/1025) + 'kb)';
+                this.panel.info.string = 'New version found, please try to update. (' + Math.ceil(this._am.getTotalBytes()/1024) + 'kb)';
                 this.panel.checkBtn.active = false;
                 this.panel.fileProgress.progress = 0;
                 this.panel.byteProgress.progress = 0;
@@ -280,7 +280,7 @@ cc.Class({
                 this.panel.fileProgress.progress = event.getPercentByFile();
 
                 this.panel.fileLabel.string = event.getDownloadedFiles() + ' / ' + event.getTotalFiles();
-                this.panel.byteLabel.string = event.getDownloadedBytes() + ' / ' + event.getTotalBytes();
+                this.panel.byteLabel.string = event.getDownloadedBytes() + ' / ' + Math.ceil(event.getTotalBytes()/1024);
 
                 var msg = event.getMessage();
                 if (msg) {
