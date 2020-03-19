@@ -178,12 +178,13 @@ function Version(argv) {
         if (first_version == manifest.version) {
             // 清除版本数据
             rmdirSync(orgin);
-            rmdirSync(dest);
 
             // 生成首包
             mkdirSync(orgin);
             copyDir(path.join(dest, 'src'), path.join(orgin, 'src'));
             copyDir(path.join(dest, 'res'), path.join(orgin, 'res'));       
+
+            rmdirSync(dest);
             Editor && Editor.Dialog.messageBox(null, {type: "info", message: "new first package done!"});
         }
         else {
@@ -192,10 +193,10 @@ function Version(argv) {
         }
     }
     else if (fs.existsSync(path.join(orgin, 'src'))) {
-        rmdirSync(path.join(dest, 'src'));
-        rmdirSync(path.join(dest, 'res'));
-        copyDir(path.join(orgin, 'src'), path.join(dest, 'src'));
-        copyDir(path.join(orgin, 'res'), path.join(dest, 'res'));
+        rmdirSync(path.join(src, 'src'));
+        rmdirSync(path.join(src, 'res'));
+        copyDir(path.join(orgin, 'src'), path.join(src, 'src'));
+        copyDir(path.join(orgin, 'res'), path.join(src, 'res'));
         Editor && Editor.warn("replace build res/src with first package resource.")
     }
 }

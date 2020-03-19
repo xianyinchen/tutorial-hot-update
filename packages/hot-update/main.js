@@ -5,7 +5,7 @@ var Path = require("fire-path");
 var GenV = require("./generator")
 
 var first_version = "1.0.0";
-var remote_address = "192.168.55.48:5501";
+var remote_address = "192.168.55.31:5501";
 var orgin_assets = Path.join(__dirname, "../../orgin-assets/");
 var remote_assets = Path.join(__dirname, "../../remote-assets/");
 
