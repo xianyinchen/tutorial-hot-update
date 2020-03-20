@@ -28,16 +28,14 @@ module.exports = {
                 }
 
                 var newStr =
-                    "(function () {\n" +
-                    "    if (typeof window.jsb === 'object') {\n" +
-                    "        var hotUpdateSearchPaths = localStorage.getItem('HotUpdateSearchPaths');\n" +
-                    "        if (hotUpdateSearchPaths) {\n" +
-                    "            var _storagePath = [(jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + hotUpdateSearchPaths];\n" +
-                    "            jsb.AssetsManager.checkFinish && jsb.AssetsManager.checkFinish(_storagePath);\n" +
-                    "            jsb.fileUtils.setSearchPaths(_storagePath);\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "})();\n";
+                "(function () {\n" +
+                "    if (typeof window.jsb === 'object') {\n" +
+                "        var hotUpdateSearchPaths = localStorage.getItem('HotUpdateSearchPaths');\n" +
+                "        if (hotUpdateSearchPaths) {\n" +
+                "            jsb.fileUtils.setSearchPaths(JSON.parse(hotUpdateSearchPaths));\n" +
+                "        }\n" +
+                "    }\n" +
+                "})();\n";
                 newStr += data;
                 Fs.writeFile(url, newStr, function (error) {
                     if (err) {
