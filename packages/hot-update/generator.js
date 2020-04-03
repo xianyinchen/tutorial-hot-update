@@ -116,6 +116,30 @@ function Version(argv) {
         }
     }
 
+    // 添加MD5记录
+    function addRecord(src, subpath, obj) {
+        // Size in Bytes
+        stat = fs.statSync(subpath);
+        size = stat['size'];
+        md5 = crypto.createHash('md5').update(fs.readFileSync(subpath)).digest('hex');
+        compressed = path.extname(subpath).toLowerCase() === '.zip';
+
+        relative = path.relative(src, subpath);
+        relative = relative.replace(/\\/g, '/');
+        relative = encodeURI(relative);
+        obj[relative] = {
+            'size': size,
+            'md5': md5
+        };
+        if (compressed) {
+            obj[relative].compressed = true;
+        }
+
+        var dest_file = path.join(dest/*, manifest.version*/, subpath.replace(src, ''));
+        mkdirsSync(dest_file.replace(path.basename(dest_file), ''));
+        fs.writeFileSync(dest_file, fs.readFileSync(subpath));
+    }
+
     function readDir(dir, obj) {
         if (!fs.existsSync(dir))
             return;
@@ -135,25 +159,7 @@ function Version(argv) {
                 readDir(subpath, obj);
             }
             else if (stat.isFile()) {
-                // Size in Bytes
-                size = stat['size'];
-                md5 = crypto.createHash('md5').update(fs.readFileSync(subpath)).digest('hex');
-                compressed = path.extname(subpath).toLowerCase() === '.zip';
-
-                relative = path.relative(src, subpath);
-                relative = relative.replace(/\\/g, '/');
-                relative = encodeURI(relative);
-                obj[relative] = {
-                    'size': size,
-                    'md5': md5
-                };
-                if (compressed) {
-                    obj[relative].compressed = true;
-                }
-
-                var dest_file = path.join(dest/*, manifest.version*/, subpath.replace(src, ''));
-                mkdirsSync(dest_file.replace(path.basename(dest_file), ''));
-                fs.writeFileSync(dest_file, fs.readFileSync(subpath));
+                addRecord(src, subpath, obj);
             }
         }
     }
@@ -161,6 +167,9 @@ function Version(argv) {
     // Iterate res and src folder
     readDir(path.join(src, 'src'), manifest.assets);
     readDir(path.join(src, 'res'), manifest.assets);
+
+    // main.js
+    addRecord(src, path.join(src, 'main.js'), manifest.assets);    
 
     var destManifest = path.join(dest/*, manifest.version*/, 'project.manifest');
     var destVersion = path.join(dest/*, manifest.version*/, 'version.manifest');
@@ -182,10 +191,11 @@ function Version(argv) {
             // 生成首包
             mkdirSync(orgin);
             copyDir(path.join(dest, 'src'), path.join(orgin, 'src'));
-            copyDir(path.join(dest, 'res'), path.join(orgin, 'res'));       
+            copyDir(path.join(dest, 'res'), path.join(orgin, 'res'));
+            fs.copyFileSync(path.join(dest, 'main.js'), path.join(orgin, 'main.js'));            
 
             rmdirSync(dest);
-            Editor && Editor.Dialog.messageBox(null, {type: "info", message: "new first package done!"});
+            Editor && Editor.Dialog.messageBox(null, { type: "info", message: "new first package done!" });
         }
         else {
             // 生成首包之前同步 project.manifest            
@@ -197,6 +207,7 @@ function Version(argv) {
         rmdirSync(path.join(src, 'res'));
         copyDir(path.join(orgin, 'src'), path.join(src, 'src'));
         copyDir(path.join(orgin, 'res'), path.join(src, 'res'));
+        fs.copyFileSync(path.join(orgin, 'main.js'), path.join(src, 'main.js'));        
         Editor && Editor.warn("replace build res/src with first package resource.")
     }
 }
