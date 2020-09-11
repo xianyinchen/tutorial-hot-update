@@ -60,7 +60,7 @@ function Version(argv) {
     var first_version = '1.0.0';
     var orgin = './orgin-assets/';
     var dest = './remote-assets/';
-    var src = './jsb/';
+    var src = './jsb-link/';
 
     // Parse arguments
     var i = 0;
@@ -166,7 +166,7 @@ function Version(argv) {
 
     // Iterate res and src folder
     readDir(path.join(src, 'src'), manifest.assets);
-    readDir(path.join(src, 'res'), manifest.assets);
+    readDir(path.join(src, 'assets'), manifest.assets);
 
     // main.js
     addRecord(src, path.join(src, 'main.js'), manifest.assets);    
@@ -191,7 +191,7 @@ function Version(argv) {
             // 生成首包
             mkdirSync(orgin);
             copyDir(path.join(dest, 'src'), path.join(orgin, 'src'));
-            copyDir(path.join(dest, 'res'), path.join(orgin, 'res'));
+            copyDir(path.join(dest, 'assets'), path.join(orgin, 'assets'));
             fs.copyFileSync(path.join(dest, 'main.js'), path.join(orgin, 'main.js'));            
 
             rmdirSync(dest);
@@ -204,9 +204,9 @@ function Version(argv) {
     }
     else if (fs.existsSync(path.join(orgin, 'src'))) {
         rmdirSync(path.join(src, 'src'));
-        rmdirSync(path.join(src, 'res'));
+        rmdirSync(path.join(src, 'assets'));
         copyDir(path.join(orgin, 'src'), path.join(src, 'src'));
-        copyDir(path.join(orgin, 'res'), path.join(src, 'res'));
+        copyDir(path.join(orgin, 'assets'), path.join(src, 'assets'));
         fs.copyFileSync(path.join(orgin, 'main.js'), path.join(src, 'main.js'));        
         Editor && Editor.warn("replace build res/src with first package resource.")
     }
