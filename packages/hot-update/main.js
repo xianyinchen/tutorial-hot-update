@@ -47,6 +47,20 @@ main_script();
 `;
 }
 
+function rmdirSync(path) {
+    if (fs.existsSync(path)) {
+        fs.readdirSync(path).forEach(function (file) {
+            var curPath = path + "/" + file;
+            if (fs.statSync(curPath).isDirectory()) { // recurse
+                rmdirSync(curPath);
+            } else { // delete file
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(path);
+    }
+};
+
 function getIPAdress() {
     var interfaces = os.networkInterfaces();
     for (var devName in interfaces) {
@@ -131,14 +145,38 @@ var remote_assets = Path.join(__dirname, "../../remote-assets/");
 module.exports = {
     load: function () {
         // 当 package 被正确加载的时候执行
+        Editor.Builder.on("build-finished", function (options, callback) {
+            Editor.log("============ &&&&1231231");
+            callback();
+        });
     },
 
     unload: function () {
         // 当 package 被正确卸载的时候执行
     },
 
+    zipop: function() {
+        try {
+            var adm_zip = require('adm-zip');
+            var zip = new adm_zip();
+
+            zip.addLocalFolder(Path.join(__dirname, "../../", "build/jsb-link/assets/main/import"), "import");
+
+            Editor.log("start compress resources ...")
+            zip.writeZip(Path.join(__dirname, "../../", "build/jsb-link/assets/main/import.zip"));
+            Editor.log("end resources. ", Path.join(__dirname, "../../", "build/jsb-link/assets/main/import.zip"))
+
+            rmdirSync(Path.join(__dirname, "../../", "build/jsb-link/assets/main/import"));
+        } catch (e) {
+            Editor.error(e.message)
+        }
+    },
+
     messages: {
-        "editor:build-finished": function (event, target) {
+        "build-finished": function (event, target) {
+            Editor.log("============ 1231231")
+            event.
+            return;
             var remote_address = `${getIPAdress()}:7788`
             createServer(getIPAdress(), 7788);
 
@@ -168,6 +206,9 @@ module.exports = {
             var numVersion = first_version.split(".");
             var first_check = (numVersion[0] || "1") + "." + (numVersion[1] || "0") + "." + (parseInt(numVersion[2] || "0") + 1);
 
+            // 执行压缩
+            this.zipop();
+            
             try {
                 // 生成更新包
                 GenV.Version([
@@ -194,7 +235,7 @@ module.exports = {
             }
 
             // 更新版本文件
-            Editor.assetdb.refresh("db://assets//project.manifest");
+            Editor.assetdb.refresh("db://assets//project.manifest");            
         }
     }
 };

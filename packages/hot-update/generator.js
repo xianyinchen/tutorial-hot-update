@@ -164,6 +164,10 @@ function Version(argv) {
         }
     }
 
+    // new folder
+    rmdirSync(dest);
+    mkdirSync(dest);
+
     // Iterate res and src folder
     readDir(path.join(src, 'src'), manifest.assets);
     readDir(path.join(src, 'assets'), manifest.assets);
@@ -173,8 +177,6 @@ function Version(argv) {
 
     var destManifest = path.join(dest/*, manifest.version*/, 'project.manifest');
     var destVersion = path.join(dest/*, manifest.version*/, 'version.manifest');
-
-    mkdirSync(dest);
 
     fs.writeFileSync(destManifest, JSON.stringify(manifest))
 
