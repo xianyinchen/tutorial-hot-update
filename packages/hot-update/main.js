@@ -6,13 +6,15 @@ var Path = require("fire-path");
 var inject_script = `
 (function () {
     if (typeof window.jsb === 'object') {
-        var hotUpdateSearchPaths = localStorage.getItem('HotUpdateSearchPaths');
-        if (hotUpdateSearchPaths) {
-            var paths = JSON.parse(hotUpdateSearchPaths);
-            jsb.fileUtils.setSearchPaths(paths);
+        var HotUpdateSubPath = localStorage.getItem('HotUpdateSubPath');
+        if (HotUpdateSubPath) {
+            var newpath = jsb.fileUtils.getWritablePath() + HotUpdateSubPath;
+            var searchPaths = jsb.fileUtils.getSearchPaths();
+            Array.prototype.unshift.apply(searchPaths, newpath);            
+            jsb.fileUtils.setSearchPaths(searchPaths);
 
             var fileList = [];
-            var storagePath = paths[0] || '';
+            var storagePath = newpath;
             var tempPath = storagePath + '_temp/';
             var baseOffset = tempPath.length;
 

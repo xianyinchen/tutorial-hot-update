@@ -326,16 +326,15 @@ cc.Class({
         if (needRestart) {
             this._am.setEventCallback(null);
             this._updateListener = null;
+
             // Prepend the manifest's search path
-            var searchPaths = jsb.fileUtils.getSearchPaths();
-            var newPaths = this._am.getLocalManifest().getSearchPaths();
-            console.log(JSON.stringify(newPaths));
-            Array.prototype.unshift.apply(searchPaths, newPaths);
-            // This value will be retrieved and appended to the default search path during game startup,
-            // please refer to samples/js-tests/main.js for detailed usage.
-            // !!! Re-add the search paths in main.js is very important, otherwise, new scripts won't take effect.
-            cc.sys.localStorage.setItem('HotUpdateSearchPaths', JSON.stringify(searchPaths));
-            jsb.fileUtils.setSearchPaths(searchPaths);
+            var HotUpdateSubPath = cc.sys.localStorage.getItem('HotUpdateSubPath');
+            if (HotUpdateSubPath) {
+                var newpath = jsb.fileUtils.getWritablePath() + HotUpdateSubPath;
+                var searchPaths = jsb.fileUtils.getSearchPaths();
+                Array.prototype.unshift.apply(searchPaths, newpath);                        
+                jsb.fileUtils.setSearchPaths(searchPaths);
+            }
 
             cc.audioEngine.stopAll();
             cc.game.restart();
@@ -418,6 +417,10 @@ cc.Class({
         this._storagePath = ((jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + 'blackjack-remote-asset');
         cc.log('Storage path for remote asset : ' + this._storagePath);
 
+        // This value will be retrieved and appended to the default search path during game startup,
+        // !!! Re-add the search paths in main.js is very important, otherwise, new scripts won't take effect.
+        cc.sys.localStorage.setItem('HotUpdateSubPath', 'blackjack-remote-asset');
+                
         // Setup your own version compare handler, versionA and B is versions in string
         // if the return value greater than 0, versionA is greater than B,
         // if the return value equals 0, versionA equals to B,
