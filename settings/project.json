@@ -12,7 +12,8 @@
     "3D Primitive",
     "3D Physics/cannon.js",
     "3D Physics/Builtin",
-    "3D Particle"
+    "3D Particle",
+    "SafeArea"
   ],
   "fit-height": true,
   "fit-width": false,
@@ -32,7 +33,7 @@
     "appID": "",
     "appSecret": ""
   },
-  "last-module-event-record-time": 1584427775952,
+  "last-module-event-record-time": 1605859580560,
   "assets-sort-type": "name",
   "facebook": {
     "enable": false,
@@ -43,5 +44,8 @@
     "audience": {
       "enable": false
     }
-  }
+  },
+  "migrate-history": [
+    "cloud-function"
+  ]
 }

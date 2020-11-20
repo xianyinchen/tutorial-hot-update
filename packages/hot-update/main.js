@@ -144,11 +144,7 @@ var remote_assets = Path.join(__dirname, "../../remote-assets/");
 
 module.exports = {
     load: function () {
-        // 当 package 被正确加载的时候执行
-        Editor.Builder.on("build-finished", function (options, callback) {
-            Editor.log("============ &&&&1231231");
-            callback();
-        });
+
     },
 
     unload: function () {
@@ -173,10 +169,9 @@ module.exports = {
     },
 
     messages: {
-        "build-finished": function (event, target) {
-            Editor.log("============ 1231231")
-            event.
-            return;
+        "editor:build-finished": function (event, target) {
+            console.log("============")
+
             var remote_address = `${getIPAdress()}:7788`
             createServer(getIPAdress(), 7788);
 
@@ -207,7 +202,9 @@ module.exports = {
             var first_check = (numVersion[0] || "1") + "." + (numVersion[1] || "0") + "." + (parseInt(numVersion[2] || "0") + 1);
 
             // 执行压缩
-            this.zipop();
+            if (first_done) {
+                this.zipop();
+            }
             
             try {
                 // 生成更新包
